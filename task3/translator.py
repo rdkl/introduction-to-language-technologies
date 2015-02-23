@@ -5,8 +5,8 @@ import nltk
 
 
 # Install punkt package first using next line (13Mb).
-# nltk.download()
-
+# 2nltk.download()
+ 
 filename_english_text = "./data/english_sample.txt"
 filename_russian_text = "./data/russian_samples.txt"
 
@@ -72,15 +72,39 @@ for i in xrange(a):
     for t in xrange(max(
                     [len(line_google), len(line_yandex), len(line_micros)])):
         
+        printed = False
+        non_printed_words = ""
+        
         if len(line_yandex) > t:
-            line += [line_yandex[t]]
+            if full_dict[stemmer.stem(line_yandex[t].decode("utf-8"))] > 1:
+                full_dict[stemmer.stem(line_yandex[t].decode("utf-8"))] = 0
+                printed = True
+                print line_yandex[t],
+            else:
+                non_printed_words += line_yandex[t] + " "
+            #line += [line_yandex[t]]
         if len(line_google) > t:
-            line += [line_google[t]]
+            if full_dict[stemmer.stem(line_google[t].decode("utf-8"))] > 1:
+                full_dict[stemmer.stem(line_google[t].decode("utf-8"))] = 0    
+                printed = True
+                print line_google[t],
+            else:
+                non_printed_words += line_google[t] + " "
+            
+            #line += [line_google[t]]
         if len(line_micros) > t:
-            line += [line_micros[t]]
-
-    for word in line:
-        print word
+            if full_dict[stemmer.stem(line_micros[t].decode("utf-8"))] > 1:
+                full_dict[stemmer.stem(line_micros[t].decode("utf-8"))] = 0
+                printed = True
+                print line_micros[t],
+            else:
+                non_printed_words += line_micros[t] + " "
+            
+            #line += [line_micros[t]]
+        if not printed:
+            print "_:(%s)" % (non_printed_words),
+    #for word in line:
+    #    print word
             
     for word in line:
     #    print word
