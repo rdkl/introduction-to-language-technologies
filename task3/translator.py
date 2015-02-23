@@ -2,11 +2,12 @@
 
 import collections
 import nltk
+import re
 
 
-# Install punkt package first using next line (13Mb).
-# 2nltk.download()
- 
+# Install punkt package first using next line (13Mb). It is necessary for 
+# stemmer's correctness.
+# nltk.download()
 filename_english_text = "./data/english_sample.txt"
 filename_russian_text = "./data/russian_samples.txt"
 
@@ -15,101 +16,96 @@ lines = f.readlines()
 f.close()
 
 
+# Stemmer for translated words.
 stemmer = nltk.stem.SnowballStemmer("russian")
 
-translate_google = []
-translate_micros = []
-translate_yandex = []
+translate = {"google" : [], "bing" : [], "yandex" : []}
+# Order of engines in file with translated texts.
+engines_order = ["google", "bing", "yandex"]
 
-
-translations = [translate_google, translate_micros, translate_yandex]
+# i is a number of engine.
 i = 0
-
 for line in lines:
-    current_list = translations[i]
+    current_list = translate[engines_order[i]]
     if line[0] == "#":
         continue
     
     if len(line) == 1:
         i += 1
     else:
-        current_list += [line] 
+        # Remove last \n.
+        current_list += [line.rstrip(". \n?!")]
+        
+# Change order.
+engines_order = ["yandex", "google", "bing"]
 
+# Now in translate[engine] we have list of lines obtainted from that engine.
 # Checking correctness of input data.
-a = len(translate_google)
-b = len(translate_micros)
-c = len(translate_yandex)
+a = len(translate["google"])
+b = len(translate["bing"])
+c = len(translate["yandex"])
 
 if (a != b) or (a != c):
     print "Can not read input data:\n    google -- %d line(s).\n    bing   -- %d"\
         " line(s).\n    yandex -- %d line(s)." % (a, b, c) 
     assert(False)
+    
+# Save punktuation.
+tracked_punkt_symbols = [",", ":", ";"]
+# Number of occurrences of current word -- punkt symbol. 
+punktuation = collections.Counter()
+# Concrete symbol for word.
+punktuation_symbol = collections.Counter()
 
-dicts = [[], [], []]
+for line_number in xrange(a):
+    # Number of occurrences of current stemmed word in translated engine.
+    occurences_dict = {engine : {} for engine in engines_order}
+    common_occurences = collections.Counter()
+    
+    for engine in engines_order:
+        line = translate[engine][line_number]
+        for word in line.split():
+             if word[-1] in tracked_punkt_symbols:
+                 stemmed_word = stemmer.stem(word[:-1].decode("utf-8"))
+                 punktuation[stemmed_word] += 1
+                 punktuation_symbol[stemmed_word] = word[-1]
+             else:
+                 stemmed_word = stemmer.stem(word.decode("utf-8"))
+                 
+             occurences_dict[engine][stemmed_word] = 1
 
-translations_tokenized = [[], [], []]
-# i -- number of sentence.
-for i in xrange(a):
-    # j -- number of translate engine.
-    for j in xrange(len(translations)):
-        dicts[j] = collections.Counter()
-        line = translations[j][i]
-        
-        for item in nltk.word_tokenize(line):
-            dicts[j][stemmer.stem(item.decode("utf-8"))] = 1
+        for item in occurences_dict[engine]:
+            common_occurences[item] += 1
     
-    full_dict = collections.Counter()
+    engine_lines = {engine : re.sub('[:,;]', '', 
+                                    translate[engine][line_number]).split()
+                    for engine in engines_order}
     
-    for dict in dicts:
-        for item in dict:
-            full_dict[item] += 1
+    #print engine_lines["yandex"]
+    max_len = max([len(item) for item in engine_lines.values()])
     
-    line_google = nltk.word_tokenize(translations[0][i])
-    line_micros = nltk.word_tokenize(translations[1][i])
-    line_yandex = nltk.word_tokenize(translations[1][i])
+    #for item in engine_lines["yandex"]:
+    #    print item, stemmer.stem(item.decode("utf-8"))
     
-    line = []
-    for t in xrange(max(
-                    [len(line_google), len(line_yandex), len(line_micros)])):
-        
+    for word_number in xrange(max_len):
         printed = False
         non_printed_words = ""
-        
-        if len(line_yandex) > t:
-            if full_dict[stemmer.stem(line_yandex[t].decode("utf-8"))] > 1:
-                full_dict[stemmer.stem(line_yandex[t].decode("utf-8"))] = 0
-                printed = True
-                print line_yandex[t],
-            else:
-                non_printed_words += line_yandex[t] + " "
-            #line += [line_yandex[t]]
-        if len(line_google) > t:
-            if full_dict[stemmer.stem(line_google[t].decode("utf-8"))] > 1:
-                full_dict[stemmer.stem(line_google[t].decode("utf-8"))] = 0    
-                printed = True
-                print line_google[t],
-            else:
-                non_printed_words += line_google[t] + " "
-            
-            #line += [line_google[t]]
-        if len(line_micros) > t:
-            if full_dict[stemmer.stem(line_micros[t].decode("utf-8"))] > 1:
-                full_dict[stemmer.stem(line_micros[t].decode("utf-8"))] = 0
-                printed = True
-                print line_micros[t],
-            else:
-                non_printed_words += line_micros[t] + " "
-            
-            #line += [line_micros[t]]
+        for engine in engines_order:
+            if len(engine_lines[engine]) > word_number:
+                word = engine_lines[engine][word_number]
+                stemmed_word = stemmer.stem(word.decode("utf-8"))
+                # print "\n", word, stemmed_word, common_occurences[stemmed_word]
+                if common_occurences[stemmed_word] > 1:
+                    printed = True
+                    common_occurences[stemmed_word] = 0
+                    if punktuation[stemmed_word] > 0:
+                        punktuation[stemmed_word] -= 1
+                        print word + punktuation_symbol[stemmed_word],
+                    else:
+                        print word,
+                else:
+                    non_printed_words += word + " "
         if not printed:
-            print "_:(%s)" % (non_printed_words),
-    #for word in line:
-    #    print word
-            
-    for word in line:
-    #    print word
-        if full_dict[stemmer.stem(word.decode("utf-8"))] > 1:
-            print word,
-            full_dict[stemmer.stem(word.decode("utf-8"))] = 0
-         
-    print "\n" + "-" * 80
+            print "_(%s)" % (non_printed_words),
+    
+    print
