@@ -57,6 +57,8 @@ punktuation = collections.Counter()
 # Concrete symbol for word.
 punktuation_symbol = collections.Counter()
 
+result_text = ["" for _ in xrange(a)]
+result_text_debug = ["" for _ in xrange(a)] 
 for line_number in xrange(a):
     # Number of occurrences of current stemmed word in translated engine.
     occurences_dict = {engine : {} for engine in engines_order}
@@ -65,14 +67,14 @@ for line_number in xrange(a):
     for engine in engines_order:
         line = translate[engine][line_number]
         for word in line.split():
-             if word[-1] in tracked_punkt_symbols:
-                 stemmed_word = stemmer.stem(word[:-1].decode("utf-8"))
-                 punktuation[stemmed_word] += 1
-                 punktuation_symbol[stemmed_word] = word[-1]
-             else:
-                 stemmed_word = stemmer.stem(word.decode("utf-8"))
+            if word[-1] in tracked_punkt_symbols:
+                stemmed_word = stemmer.stem(word[:-1].decode("utf-8"))
+                punktuation[stemmed_word] += 1
+                punktuation_symbol[stemmed_word] = word[-1]
+            else:
+                stemmed_word = stemmer.stem(word.decode("utf-8"))
                  
-             occurences_dict[engine][stemmed_word] = 1
+            occurences_dict[engine][stemmed_word] = 1
 
         for item in occurences_dict[engine]:
             common_occurences[item] += 1
@@ -94,18 +96,62 @@ for line_number in xrange(a):
             if len(engine_lines[engine]) > word_number:
                 word = engine_lines[engine][word_number]
                 stemmed_word = stemmer.stem(word.decode("utf-8"))
-                # print "\n", word, stemmed_word, common_occurences[stemmed_word]
                 if common_occurences[stemmed_word] > 1:
                     printed = True
                     common_occurences[stemmed_word] = 0
                     if punktuation[stemmed_word] > 0:
                         punktuation[stemmed_word] -= 1
-                        print word + punktuation_symbol[stemmed_word],
+                        result_text[line_number] += \
+                            word + punktuation_symbol[stemmed_word] + " " 
+                        result_text_debug[line_number] += \
+                            word + punktuation_symbol[stemmed_word] + " "
+                        #print word + punktuation_symbol[stemmed_word],
                     else:
-                        print word,
+                        result_text[line_number] += word + " "
+                        result_text_debug[line_number] += word + " "
+                        #print word,
                 else:
                     non_printed_words += word + " "
         if not printed:
-            print "_(%s)" % (non_printed_words),
+            #print "_(%s)" % (non_printed_words),
+            result_text_debug[line_number] += \
+                "_(%s)" % (non_printed_words) + " "
+            
+    #print
     
-    print
+f = open("./data/replace_dict")
+lines = f.readlines()
+f.close()
+
+for item in result_text_debug:
+    result_text_debug[0] += "Проверкой,"
+
+
+# It can work really faster.
+for line in lines:
+    term = line.split()[0]
+    replacement = line.split()[1]
+    for line_number in xrange(len(result_text_debug)):
+        result_text[line_number] = re.sub(term, replacement, 
+                                          result_text[line_number], 
+                                          flags = re.U)
+        result_text_debug[line_number] = \
+                                   re.sub(term, replacement, 
+                                          result_text_debug[line_number], 
+                                          flags = re.U)
+                                  
+banned_symbols = [".", ",", "?", ":", ";", "!"] 
+with open("data/debug_output.txt", "w") as f:
+    for item in result_text_debug:
+        if item[-2] in banned_symbols:
+            print >>f, item[:-2]
+        else:
+            print >>f, item
+        
+with open("data/output.txt", "w") as f:
+    for item in result_text:
+        if item[-2] in banned_symbols:
+            print >>f, item[:-2]
+        else:
+            print >>f, item
+        
