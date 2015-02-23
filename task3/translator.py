@@ -91,7 +91,7 @@ for line_number in xrange(a):
     
     for word_number in xrange(max_len):
         printed = False
-        non_printed_words = ""
+        non_printed_words = []
         for engine in engines_order:
             if len(engine_lines[engine]) > word_number:
                 word = engine_lines[engine][word_number]
@@ -111,11 +111,24 @@ for line_number in xrange(a):
                         result_text_debug[line_number] += word + " "
                         #print word,
                 else:
-                    non_printed_words += word + " "
+                    non_printed_words += [word]
         if not printed:
+            # Trash.
+            if (len(non_printed_words) == 2 and 
+                stemmer.stem(non_printed_words[0].decode("utf-8")) == \
+                stemmer.stem(non_printed_words[1].decode("utf-8"))) \
+                or (len(non_printed_words) == 3 and 
+                    stemmer.stem(non_printed_words[0].decode("utf-8")) == \
+                    stemmer.stem(non_printed_words[1].decode("utf-8")) and \
+                    stemmer.stem(non_printed_words[1].decode("utf-8")) == \
+                    stemmer.stem(non_printed_words[2].decode("utf-8"))):
+                result_text_debug[line_number] += non_printed_words[0]
+                result_text[line_number] += non_printed_words[0] + " "
+            else:
             #print "_(%s)" % (non_printed_words),
-            result_text_debug[line_number] += \
-                "_(%s)" % (non_printed_words) + " "
+                non_printed_words = " ".join(non_printed_words)
+                result_text_debug[line_number] += \
+                    "_(%s)" % (non_printed_words) + " "
             
     #print
     
