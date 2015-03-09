@@ -118,9 +118,15 @@ def generate_goals_phrase(team, actor_1, minute, score_home_team,
     return result
 
 #-----------------------------------------------------------------------------
-def generate_injury_phrase(actor):
+def generate_injury_phrase(actor, minute):
     result = ""
-    result += actor + " received an injury and was removed from the rink."
+    selector = random.randint(0, 2)
+    if selector == 0:
+        result += actor + " received an injury and was removed from the rink."
+    if selector == 1:
+        result += "In the " + add_ending(minute) + " minute " + actor + " was injured."
+    if selector == 2:
+        result += actor + "'s injury left him out of the game."
     return result
     
 #-----------------------------------------------------------------------------
