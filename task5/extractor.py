@@ -78,24 +78,24 @@ def generate_penalty_phrase(actor, minute, outcome):
 
 #-----------------------------------------------------------------------------
 def generate_goals_phrase(team, actor_1, minute, score_1, score_2):
-    selector = random.randint(0, 5)
+    selector = random.randint(0, 4)
     result = ""
     if selector == 0:
-        result += "Then " + actor_1 + " scored through "
+        result += "Then " + team + " scored through "
         result += actor_1 + "."
     if selector == 1:
         result += "After that " + actor_1 + " made it " + score_1 + "-" + score_2
         result += " in the " + add_ending(minute) + " minute."
+    # if selector == 2 and :
+    #     result += "After that " + actor_1 + " scored to put his team "
+    #     result += score_1 + "-" + score_2 + " up."
     if selector == 2:
-        result += "After that " + actor_1 + " scored to put his team "
-        result += score_1 + "-" + score_2 + " up."
-    if selector == 3:
         result += "Later " + actor_1 + " of " + team + " took it to "
         result +=  score_1 + "-" + score_2 + " in the " + add_ending(minute) + " minute."
-    if selector == 4:
+    if selector == 3:
         result += "Then " + team + " went to " + score_1 + "-" + score_2
         result += " thanks to " + actor_1 + "'s goal."
-    if selector == 5:
+    if selector == 4:
         result += "The goal came in the " + add_ending(minute) + " minute, " + actor_1
         result += " being the architect."
     return result
