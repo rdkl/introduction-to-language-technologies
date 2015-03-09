@@ -63,17 +63,15 @@ def generate_final_goal_phrase(team, actor_1, minute, period):
     return result
 
 #-----------------------------------------------------------------------------
-def generate_penalty_phrase(actor, minute, outcome):
+def generate_penalty_phrase(actor, minute):
     result = ""
     selector = random.randint(0, 1)
     if selector == 0:
         result += "In the " + add_endian(minute) + " minute, " + actor
-        result += " went to penalty box for " + outcome
-        result += "." 
+        result += " went to penalty box."
     if selector == 1:
         result += "In the " + add_ending(minute) + " minute, " + actor
-        result += " received a penalty for "
-        result += outcome + "."
+        result += " received a penalty."
     return result
 
 
@@ -136,6 +134,14 @@ def generate_single_goal_phrase(actor, minute):
     result += add_ending(minute) + " minute, fired by " + actor
     result += "."
     return result
+
+#-----------------------------------------------------------------------------    
+def generate_penalty_shot_phrase(team, minute, outcome):
+    result = ""
+    result += "In the " + add_ending(minute) + " " + team 
+    result += " was assigned a penalty shot, which was " + outcome
+    result += "."
+    return result    
     
 #-----------------------------------------------------------------------------
 def add_ending(number):
