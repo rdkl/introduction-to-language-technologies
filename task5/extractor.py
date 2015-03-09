@@ -6,7 +6,8 @@ import transliterate
 import random
 
 #-----------------------------------------------------------------------------
-# On the DATE HOME_TEAM welcomed GUEST_TEAM on the ice of CITY's ARENA. 
+# On the DATE HOME_TEAM welcomed GUEST_TEAM on the ice of CITY's ARENA.
+# HOME_TEAM met GUEST_TEAM on ARENA rink in CITY on DATE. 
 def generate_intro(date, home_team_name, guest_team_name, arena_name, city):
     selector = random.randint(0, 1)
     result = ""
@@ -20,7 +21,23 @@ def generate_intro(date, home_team_name, guest_team_name, arena_name, city):
     return result 
 
 #-----------------------------------------------------------------------------
-
+def add_ending(number):
+    if type(number) == int:
+        return add_ending(str(number))
+    
+    if type(number) == str:
+        if number == '11':
+            return "11th"
+        if number == '12':
+            return "12th"
+        last_digit = int(number[-1])
+        if last_digit == 1:
+            return number + "st"
+        if last_digit == 2:
+            return number +  "nd"
+        if last_digit == 3:
+            return number +  "rd"
+        return number +  "th"        
 
 #-----------------------------------------------------------------------------
 if __name__ == "__main__":
