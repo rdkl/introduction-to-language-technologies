@@ -21,6 +21,32 @@ def generate_intro(date, home_team_name, guest_team_name, arena_name, city):
     return result 
 
 #-----------------------------------------------------------------------------
+def generate_first_goal(team, actor_1, minute, actor_2, actor_3):
+    selector = random.randint(0, 5)
+    result = ""
+    if selector == 0:
+        result += team + " was the first to score through " + actor_1 + " in the "
+        result += add_ending(minute) + " " + "minute."
+    if selector == 1:
+        result += "It was " + team + " that struck first, with the effort of "
+        result += actor_1 + " in the " + add_ending(minute) + " minute."
+    if selector == 2:
+        result += team + " opened the scoring through " + actor_1 + " in the "
+        result += add_ending(minute) + " minute."
+    if selector == 3:
+        result += actor_1 + "'s goal came first in the " + add_ending(minute) + " minute."
+    if selector == 4:
+        result += actor_1 + " of " team + " was the first to score, " + minute 
+        result += " minutes into the game"
+        if actor_2 != None:
+            result += ", with the assistance of "
+            result += actor_2
+            if actor_3 != None:
+                result += " and " + actor_3
+        result += "."
+    return result
+
+#-----------------------------------------------------------------------------
 def add_ending(number):
     if type(number) == int:
         return add_ending(str(number))
