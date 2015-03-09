@@ -144,6 +144,55 @@ def generate_penalty_shot_phrase(team, minute, outcome):
     return result    
     
 #-----------------------------------------------------------------------------
+def generate_comment_after_period(action, period, 
+                                  home_score, guest_score, 
+                                  home_team, guest_team):
+    ''' 
+        Function writes comments after finish any period not overtime ors shootout
+        period - int 
+        action - bool
+        others - string
+    '''
+    result = ""
+    if period == 1:
+        if action:
+            result += "First period ended with the score of "
+            result += home_score + "-" + guest_score + "."
+        else:
+            result += "First period was not sparked by any action."
+        if home_score > guest_score:
+            result += "The " + home_team + " was in the lead."
+        elif home_score < guest_score:
+            result += "The " + guest_team + " was in the lead."
+        else:
+            result += "The tie was to be broken in the next period."
+    if period == 2:
+        if action:
+            result += "The score after the second period was "
+            result += home_score + "-" + guest_score + "."
+        else:
+            result += "Second period did not bring anything to the score."
+        if home_score > guest_score:
+            result += "The " + home_team + " was in the lead."
+        elif home_score < guest_score:
+            result += "The " + guest_team + " was in the lead."
+        else:
+            result += "So, the score was levelled by the end of the period."
+    if period == 3:
+        if action:
+            result += "The resulting score was "
+            result += home_score + "-" + guest_score + "."
+        else:
+            result += "The last period did not change the score."
+        if home_score > guest_score:
+            result += "The " + home_team + " beat " + guest_team + "."
+        elif home_score < guest_score:
+            result += "The " + guest_team + " beat " + home_team + "."
+        else:
+            result += "There was a tie, so the game went on to the overtime."    
+    return result
+    
+#-----------------------------------------------------------------------------
 def add_ending(number):
     if type(number) == int:
         return add_ending(str(number))
