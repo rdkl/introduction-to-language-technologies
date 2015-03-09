@@ -52,38 +52,55 @@ def generate_first_goal_phrase(team, actor_1, minute, actor_2, actor_3):
 def generate_final_goal_phrase(team, actor_1, minute, period):
     result = ""
     selector = random.randint(0, 2)
-    if seelctor == 0:
+    if selector == 0:
         result += "In the " + add_ending(minute) + " minute, " + actor_1
         result += " completed the scoring."
     if selector == 1:
-        result += team + " closed the game with " + actor_1 + "'s goal during the "
-        result += period + " period."
+        result += team + " closed the game with " + actor_1
+        result += "'s goal during the " + period + " period."
     if selector == 2:
         result += "The winner came in the " + add_ending(minute) + " minute."
     return result
     
 #-----------------------------------------------------------------------------
-def generate_goals_phrase(team, actor_1, minute, score_1, score_2):
+# Score_home_team and score_guest_team are computing after goal. 
+def generate_goals_phrase(team, actor_1, minute, score_home_team, 
+                          score_guest_team, team_is_home_team):
     selector = random.randint(0, 5)
     result = ""
+    #selector = 2
     if selector == 0:
-        result += "Then " + actor_1 + " scored through "
+        result += "Then " + team + " scored through "
         result += actor_1 + "."
     if selector == 1:
-        result += "After that " + actor_1 + " made it " + score_1 + "-" + score_2
+        result += "After that " + actor_1 + " made it " + score_home_team
+        result += "-" + score_guest_team
         result += " in the " + add_ending(minute) + " minute."
     if selector == 2:
-        result += "After that " + actor_1 + " scored to put his team "
-        result += score_1 + "-" + score_2 + " up."
+        prev_score_home = int(score_home_team) - int(team_is_home_team)
+        prev_score_guest = int(score_guest_team) - int(not team_is_home_team)
+        if (prev_score_home == prev_score_guest) or \
+            (prev_score_home > prev_score_guest and team_is_home_team) or \
+            (prev_score_guest > prev_score_home and not team_is_home_team):
+            result += "After that " + actor_1 + " scored to put his team "
+            result += score_home_team + "-" + score_guest_team + " up."
+        else:
+            return generate_goals_phrase(team, actor_1, minute, 
+                                         score_home_team, 
+                                         score_guest_team, 
+                                         team_is_home_team)
+             
     if selector == 3:
         result += "Later " + actor_1 + " of " + team + " took it to "
-        result +=  score_1 + "-" + score_2 + " in the " + add_ending(minute) + " minute."
+        result += score_home_team + "-" + score_guest_team + " in the "
+        result += add_ending(minute) + " minute."
     if selector == 4:
-        result += "Then " + team + " went to " + score_1 + "-" + score_2
+        result += "Then " + team + " went to " + score_home_team + "-"
+        result += score_guest_team
         result += " thanks to " + actor_1 + "'s goal."
     if selector == 5:
-        result += "The goal came in the " + add_ending(minute) + " minute, " + actor_1
-        result += " being the architect."
+        result += "The goal came in the " + add_ending(minute) + " minute, " 
+        result += actor_1 + " being the architect."
     return result
 
 #-----------------------------------------------------------------------------
@@ -91,11 +108,12 @@ def add_ending(number):
     if type(number) == int:
         return add_ending(str(number))
     
-    if type(number) == str:
+    if type(number) == str or type(number) == unicode:
         if number == '11':
             return "11th"
         if number == '12':
             return "12th"
+        
         last_digit = int(number[-1])
         if last_digit == 1:
             return number + "st"
@@ -106,8 +124,7 @@ def add_ending(number):
         return number +  "th"        
 
 #-----------------------------------------------------------------------------
-def swapper(name):
-    assert(type(name) == str)
+def swapper(name):    
     space_position = name.find(" ")
     
     name = name[space_position:] + " " + name[:space_position]
@@ -136,7 +153,10 @@ if __name__ == "__main__":
              ws["F2"].value : guest_team}
     
     team_names = {home_team : ws["E2"].value,
-                     guest_team: ws["F2"].value}
+                  guest_team: ws["F2"].value}
+    
+    scores = {home_team :  0,
+              guest_team : 0}
     
     # Generate intro section.
     match_date = ws["A2"].value
@@ -145,8 +165,10 @@ if __name__ == "__main__":
                            str(match_date.strftime("%d")), 
                            team_names[home_team], 
                            team_names[guest_team], 
-                           translit(ws["B2"].value, "ru", reversed=True), 
-                           translit(ws["C2"].value, "ru", reversed=True))
+                           translit(ws["B2"].value, "ru", 
+                                            reversed=True), 
+                           translit(ws["C2"].value, "ru", 
+                                            reversed=True))
     print intro
     # End of intro section.
     
@@ -170,23 +192,25 @@ if __name__ == "__main__":
         player_name = ws["C" + str(i)].value
         player_position = ws["D" + str(i)].value
         player_name = translit(player_name, "ru", reversed=True)
-        players[home_team][player_number] = Player(player_number, player_name, 
-                                                     player_position)
+        players[home_team][player_number] = Player(player_number, 
+                                                   swapper(player_name), 
+                                                   player_position)
     
     for i in xrange(guest_team_players_start + 1, guest_team_players_end + 1):
         player_number = ws["B" + str(i)].value
         player_name = ws["C" + str(i)].value
         player_position = ws["D" + str(i)].value
         player_name = translit(player_name, "ru", reversed=True)
-        players[guest_team][player_number] = Player(player_number, player_name, 
-                                                     player_position)
+        players[guest_team][player_number] = Player(player_number, 
+                                                    swapper(player_name), 
+                                                    player_position)
         
     
     periods = [[52, 76],
                [77, 98],
                [99, 120],
                [121, 121],
-               [123, 133],
+               #[123, 133],
                ]
     goal_events = ['scored', 'score']
     important_event_actions = ['injury']   
@@ -208,19 +232,29 @@ if __name__ == "__main__":
                 team = teams[event_team]
             
             if event_action in goal_events or event_result in goal_events:
+                if team_names[home_team] == event_team:
+                    scores[home_team] += 1
+                else:
+                    scores[guest_team] += 1
+                    
                 if is_first_goal_scored is False:
                     # First goal event.
                     actor_2 = ws["H" + str(i)].value
                     actor_3 = ws["I" + str(i)].value
                     print generate_first_goal_phrase(event_team, 
-                                               players[team][event_player_number].name, 
-                                               event_time, 
-                                               players[team][actor_2].name, 
-                                               players[team][actor_3].name)
+                               players[team][event_player_number].name, 
+                               event_time, 
+                               players[team][actor_2].name, 
+                               players[team][actor_3].name)
                     is_first_goal_scored = True
-                else:
+                else:                                
                     # Common goal event.
-                    pass                
+                    print generate_goals_phrase(event_team, 
+                                            players[team][event_player_number].name, 
+                                            event_time, 
+                                            str(scores[home_team]), 
+                                            str(scores[guest_team]), 
+                                            team == home_team)                
                 continue
             
             
