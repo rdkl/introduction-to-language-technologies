@@ -67,7 +67,7 @@ def generate_penalty_phrase(actor, minute, outcome):
     result = ""
     selector = random.randint(0, 1)
     if selector == 0:
-        result += "In the " + add_endian(minute) + " minute, " + actor
+        result += "In the " + add_ending(minute) + " minute, " + actor
         result += " went to penalty box for " + outcome
         result += "." 
     if selector == 1:
