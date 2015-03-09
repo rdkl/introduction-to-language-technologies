@@ -63,17 +63,15 @@ def generate_final_goal_phrase(team, actor_1, minute, period):
     return result
 
 #-----------------------------------------------------------------------------
-def generate_penalty_phrase(actor, minute, outcome):
+def generate_penalty_phrase(actor, minute):
     result = ""
     selector = random.randint(0, 1)
     if selector == 0:
         result += "In the " + add_ending(minute) + " minute, " + actor
-        result += " went to penalty box for " + outcome
-        result += "." 
+        result += " went to penalty box."
     if selector == 1:
         result += "In the " + add_ending(minute) + " minute, " + actor
-        result += " received a penalty for "
-        result += outcome + "."
+        result += " received a penalty."
     return result
 
 
@@ -118,10 +116,32 @@ def generate_goals_phrase(team, actor_1, minute, score_home_team,
     return result
 
 #-----------------------------------------------------------------------------
-def generate_injury_phrase(actor):
+def generate_injury_phrase(actor, minute):
     result = ""
-    result += actor + " received an injury and was removed from the rink."
+    selector = random.randint(0, 2)
+    if selector == 0:
+        result += actor + " received an injury and was removed from the rink."
+    if selector == 1:
+        result += "In the " + add_ending(minute) + " minute " + actor + " was injured."
+    if selector == 2:
+        result += actor + "'s injury left him out of the game."
     return result
+    
+#-----------------------------------------------------------------------------
+def generate_single_goal_phrase(actor, minute):
+    result = ""
+    result += "The outcome was determined by a single goal in the "
+    result += add_ending(minute) + " minute, fired by " + actor
+    result += "."
+    return result
+
+#-----------------------------------------------------------------------------    
+def generate_penalty_shot_phrase(team, minute, outcome):
+    result = ""
+    result += "In the " + add_ending(minute) + " " + team 
+    result += " was assigned a penalty shot, which was " + outcome
+    result += "."
+    return result    
     
 #-----------------------------------------------------------------------------
 def add_ending(number):
@@ -267,8 +287,7 @@ if __name__ == "__main__":
                     scores[home_team] += 1
                 else:
                     scores[guest_team] += 1
-                
-                
+                    
                 if is_first_goal_scored is False:
                     # First goal event.
                     actor_2 = ws["H" + str(i)].value
