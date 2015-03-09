@@ -2,7 +2,7 @@
 
 from collections import namedtuple
 import openpyxl
-import transliterate
+from transliterate import translit
 import random
 
 #-----------------------------------------------------------------------------
@@ -40,10 +40,15 @@ def add_ending(number):
         return number +  "th"        
 
 #-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
 if __name__ == "__main__":
     # Load data.
     home_team = "home-team"
-    guest_team = "guest-team"  
+    guest_team = "guest-team"
+    
+    is_first_goal_scored = False 
     
     Player = namedtuple('Player', 
                         ("number", "name", "position"), 
@@ -58,14 +63,16 @@ if __name__ == "__main__":
     team_names = {home_team : ws["E2"].value,
                      guest_team: ws["F2"].value}
     
+    # Generate intro section.
     match_date = ws["A2"].value
     intro = generate_intro(str(match_date.strftime("%B")) + " " + \
                            str(match_date.strftime("%d")), 
-                   team_names[home_team], 
-                   team_names[guest_team], 
-                   transliterate.translit(ws["B2"].value, "ru", reversed=True), 
-                   transliterate.translit(ws["C2"].value, "ru", reversed=True))
+                           team_names[home_team], 
+                           team_names[guest_team], 
+                           translit(ws["B2"].value, "ru", reversed=True), 
+                           translit(ws["C2"].value, "ru", reversed=True))
     print intro
+    # End of intro section.
     
     players = {home_team : {},
                guest_team : {}}
@@ -86,7 +93,7 @@ if __name__ == "__main__":
         player_number = ws["B" + str(i)].value
         player_name = ws["C" + str(i)].value
         player_position = ws["D" + str(i)].value
-        player_name = transliterate.translit(player_name, "ru", reversed=True)
+        player_name = translit(player_name, "ru", reversed=True)
         players[home_team][player_number] = Player(player_number, player_name, 
                                                      player_position)
     
@@ -94,7 +101,7 @@ if __name__ == "__main__":
         player_number = ws["B" + str(i)].value
         player_name = ws["C" + str(i)].value
         player_position = ws["D" + str(i)].value
-        player_name = transliterate.translit(player_name, "ru", reversed=True)
+        player_name = translit(player_name, "ru", reversed=True)
         players[guest_team][player_number] = Player(player_number, player_name, 
                                                      player_position)
         
@@ -105,7 +112,7 @@ if __name__ == "__main__":
                [121, 121],
                [123, 133],
                ]
-    important_event_results = ['scored', 'score']
+    goal_events = ['scored', 'score']
     important_event_actions = ['injury']   
     
     
@@ -121,7 +128,15 @@ if __name__ == "__main__":
             event_place = ws["F" + str(i)].value
             event_result = ws["J" + str(i)].value
             
-            
+            if event_action in goal_events:
+                if is_first_goal_scored is False:
+                    # First goal event.
+                    is_first_goal_scored = True
+                    pass
+                else:
+                    # Common goal event.
+                    pass                
+                continue
             
             if event_team != None:
                 team = teams[event_team]
@@ -130,7 +145,7 @@ if __name__ == "__main__":
                 print players[team][event_player_number].name, event_action, 
                 print event_team
             
-            if event_result in important_event_results:
+            if event_result in goal_events:
                 print players[team][event_player_number].name, event_result, 
                 print event_team,
                 
