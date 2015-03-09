@@ -167,11 +167,11 @@ def generate_comment_after_period(action, period,
         else:
             result += "First period was not sparked by any action."
         if home_score > guest_score:
-            result += " The " + home_team + " was in the lead."
+            result += home_team + " was in the lead."
         elif home_score < guest_score:
-            result += " The " + guest_team + " was in the lead."
+            result += guest_team + " was in the lead."
         else:
-            result += " The tie was to be broken in the next period."
+            result += "\nThe tie was to be broken in the next period."
     if period == 2:
         if action:
             result += "The score after the second period was "
@@ -179,11 +179,11 @@ def generate_comment_after_period(action, period,
         else:
             result += "Second period did not bring anything to the score."
         if home_score > guest_score:
-            result += " The " + home_team + " was in the lead."
+            result += "\n" + home_team + " was in the lead."
         elif home_score < guest_score:
-            result += " The " + guest_team + " was in the lead."
+            result += "\n" + guest_team + " was in the lead."
         else:
-            result += " So, the score was leveled by the end of the period."
+            result += "\nSo, the score was leveled by the end of the period."
     if period == 3:
         if action:
             result += "The resulting score was "
@@ -191,11 +191,12 @@ def generate_comment_after_period(action, period,
         else:
             result += "The last period did not change the score."
         if home_score > guest_score:
-            result += " The " + home_team + " beat " + guest_team + "."
+            result += "\nThe " + home_team + " beat " + guest_team + "."
         elif home_score < guest_score:
-            result += " The " + guest_team + " beat " + home_team + "."
+            result += "\nThe " + guest_team + " beat " + home_team + "."
         else:
-            result += " There was a tie, so the game went on to the overtime."    
+            result += "\nThere was a tie, so the game went on to the" 
+            result += " overtime."    
     return result
     
 #-----------------------------------------------------------------------------
@@ -218,6 +219,22 @@ def add_ending(number):
             return number +  "rd"
         return number +  "th"        
 
+#-----------------------------------------------------------------------------
+def generate_overtime_ending_phrase(actor, team):
+    result = "The tie was resolved in the overtime by " + actor +" of "
+    result += team + "."
+    return result
+
+#-----------------------------------------------------------------------------
+def generate_after_penalties_phrase(actor, team, goals, attempts):
+    if goals > 1:
+        result = str(goals) + " goals were scored (from "
+    else: 
+        result = str(goals) + " goal was scored (from "
+    result += str(attempts) + " attempts),"
+    result += " and the shootout ended with a spectacular goal by "
+    result += actor + " of " + team + "."
+    return result 
 #-----------------------------------------------------------------------------
 def generate_end_phrase(home_score, guest_score):
     result = "The match ends with the score " + str(home_score) 
@@ -323,7 +340,14 @@ if __name__ == "__main__":
     for period_number in xrange(len(periods)):
         period = periods[period_number]
         first_period_start = period[0]
-        first_perion_end = period[1] 
+        first_perion_end = period[1]
+        action_flag = False
+        if period_number == 4:
+            penalties_scored_after_overtime = 0
+            last_actor = ""
+            last_team = ""
+            attempts = 0
+            
         for i in xrange(first_period_start + 1, first_perion_end + 1):
             event_number = ws["A" + str(i)].value
             event_time = ws["B" + str(i)].value
@@ -339,21 +363,29 @@ if __name__ == "__main__":
             except KeyError:
                 player_name = None
             
+            if period_number == 4:
+                attempts += 1
             
             # Goal events.
             if event_action in goal_events or event_result in goal_events:
+                action_flag = True
                 if team_names[home_team] == event_team:
                     scores[home_team] += 1
                 else:
                     scores[guest_team] += 1
 
-                    if period_number == 4:
+                    if period_number == 3:
                         # Overtime
+                        print generate_overtime_ending_phrase(player_name,
+                                                              event_team)
                         continue
                         
                         
-                    if period_number == 5:
+                    if period_number == 4:
                         # Penalties.
+                        penalties_scored_after_overtime += 1
+                        last_actor = player_name
+                        last_team = event_team
                         continue                   
                     
                 if is_first_goal_scored is False:
@@ -399,12 +431,16 @@ if __name__ == "__main__":
             if event_action in injury_events or \
                 event_result in injury_events:
                 print generate_injury_phrase(player_name, event_time)
-        
-        print generate_comment_after_period(True, 
-                                            period_number, 
+        if period_number <= 2:
+            print generate_comment_after_period(action_flag, 
+                                            period_number + 1, 
                                             scores[home_team], 
                                             scores[guest_team], 
                                             team_names[home_team], 
                                             team_names[guest_team])
+    if period_number == 4:
+        print generate_after_penalties_phrase(last_actor, last_team, 
+                                    penalties_scored_after_overtime, 
+                                    attempts) 
     
     print generate_end_phrase(home_final_score, guest_final_score)
