@@ -118,6 +118,12 @@ def generate_goals_phrase(team, actor_1, minute, score_home_team,
     return result
 
 #-----------------------------------------------------------------------------
+def generate_injury_phrase(actor):
+    result = ""
+    result += actor + " received an injury and was removed from the rink."
+    return result
+    
+#-----------------------------------------------------------------------------
 def add_ending(number):
     if type(number) == int:
         return add_ending(str(number))
