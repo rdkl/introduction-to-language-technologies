@@ -190,13 +190,10 @@ if __name__ == "__main__":
             event_place = ws["F" + str(i)].value
             event_result = ws["J" + str(i)].value
             
-            
-            
             if event_team != None:
                 team = teams[event_team]
             
             if event_action in goal_events or event_result in goal_events:
-                print "dsad"
                 if is_first_goal_scored is False:
                     # First goal event.
                     actor_2 = ws["H" + str(i)].value
