@@ -130,6 +130,14 @@ def generate_injury_phrase(actor, minute):
     return result
     
 #-----------------------------------------------------------------------------
+def generate_single_goal_phrase(actor, minute):
+    result = ""
+    result += "The outcome was determined by a single goal in the "
+    result += add_ending(minute) + " minute, fired by " + actor
+    result += "."
+    return result
+    
+#-----------------------------------------------------------------------------
 def add_ending(number):
     if type(number) == int:
         return add_ending(str(number))
