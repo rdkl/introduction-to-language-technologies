@@ -61,14 +61,28 @@ def generate_final_goal_phrase(team, actor_1, minute, period):
     if selector == 2:
         result += "The winner came in the " + add_ending(minute) + " minute."
     return result
-    
+
+#-----------------------------------------------------------------------------
+def generate_penalty_phrase(actor, minute, outcome):
+    result = ""
+    selector = random.randint(0, 1)
+    if selector == 0:
+        result += "In the " + add_endian(minute) + " minute, " + actor
+        result += " went to penalty box for " + outcome
+        result += "." 
+    if selector == 1:
+        result += "In the " + add_ending(minute) + " minute, " + actor
+        result += " received a penalty for "
+        result += outcome + "."
+    return result
+
+
 #-----------------------------------------------------------------------------
 # Score_home_team and score_guest_team are computing after goal. 
 def generate_goals_phrase(team, actor_1, minute, score_home_team, 
                           score_guest_team, team_is_home_team):
     selector = random.randint(0, 5)
     result = ""
-    #selector = 2
     if selector == 0:
         result += "Then " + team + " scored through "
         result += actor_1 + "."
@@ -247,7 +261,7 @@ if __name__ == "__main__":
                                players[team][actor_2].name, 
                                players[team][actor_3].name)
                     is_first_goal_scored = True
-                else:                                
+                else:
                     # Common goal event.
                     print generate_goals_phrase(event_team, 
                                             players[team][event_player_number].name, 
