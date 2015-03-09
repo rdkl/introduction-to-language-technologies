@@ -192,6 +192,11 @@ if __name__ == "__main__":
     print intro
     # End of intro section.
     
+    last_row = ws.get_highest_row()
+    home_final_score = ws["B" + str(last_row - 1)].value
+    guest_final_score = ws["B" + str(last_row)].value
+    
+    
     players = {home_team : {},
                guest_team : {}}
     
@@ -230,13 +235,14 @@ if __name__ == "__main__":
                [77, 98],
                [99, 120],
                [121, 121],
-               #[123, 133],
+               [123, 133],
                ]
     goal_events = ['scored', 'score']
-    important_event_actions = ['injury']   
+    injury_events = ['injury']   
+    penalty_box_events = ['penalty-box']
     
-    
-    for period in periods:
+    for period_number in xrange(len(periods)):
+        period = periods[period_number]
         first_period_start = period[0]
         first_perion_end = period[1] 
         for i in xrange(first_period_start + 1, first_perion_end + 1):
@@ -248,35 +254,58 @@ if __name__ == "__main__":
             event_place = ws["F" + str(i)].value
             event_result = ws["J" + str(i)].value
             
-            if event_team != None:
-                team = teams[event_team]
+            team = teams[event_team]
+            try:
+                player_name = players[team][event_player_number].name
+            except KeyError:
+                player_name = None
             
+            
+            # Goal events.
             if event_action in goal_events or event_result in goal_events:
                 if team_names[home_team] == event_team:
                     scores[home_team] += 1
                 else:
                     scores[guest_team] += 1
-                    
+                
+                
                 if is_first_goal_scored is False:
                     # First goal event.
                     actor_2 = ws["H" + str(i)].value
                     actor_3 = ws["I" + str(i)].value
                     print generate_first_goal_phrase(event_team, 
-                               players[team][event_player_number].name, 
+                               player_name, 
                                event_time, 
                                players[team][actor_2].name, 
                                players[team][actor_3].name)
                     is_first_goal_scored = True
                 else:
+                    if scores[home_team] == home_final_score and \
+                        scores[guest_team] == guest_final_score:
+                        print generate_final_goal_phrase(team, 
+                                                         player_name, 
+                                                         event_time, 
+                                                         period_number)
+                    else:
                     # Common goal event.
-                    print generate_goals_phrase(event_team, 
-                                            players[team][event_player_number].name, 
-                                            event_time, 
-                                            str(scores[home_team]), 
-                                            str(scores[guest_team]), 
-                                            team == home_team)                
-                continue
+                        print generate_goals_phrase(event_team, 
+                                player_name, 
+                                event_time, 
+                                str(scores[home_team]), 
+                                str(scores[guest_team]), 
+                                team == home_team)                
+                    continue
             
+            # Penalty-box events.
+            if event_action in penalty_box_events or \
+                event_result in penalty_box_events:
+                print generate_penalty_phrase(player_name, event_time, 
+                                        event_result)
+                
+            # Injury events.
+            if event_action in injury_events or \
+                event_result in injury_events:
+                print generate_injury_phrase(player_name)
             
             #if event_action in important_event_actions:
             #    print players[team][event_player_number].name, event_action, 
@@ -291,14 +320,3 @@ if __name__ == "__main__":
             #    else:
             #        print 
                     
-                    
-    last_row = ws.get_highest_row()
-    home_score = ws["B" + str(last_row - 1)].value
-    guest_score = ws["B" + str(last_row)].value
-    
-    if guest_score == home_score:
-        print "Result of the match is draw"
-    if guest_score > home_score:
-        print team_names[guest_team], " beat ", team_names[home_team],
-        print " with score ", guest_score, ":", home_score 
-    
