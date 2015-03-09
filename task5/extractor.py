@@ -8,25 +8,25 @@ import random
 #-----------------------------------------------------------------------------
 # On the DATE HOME_TEAM welcomed GUEST_TEAM on the ice of CITY's ARENA.
 # HOME_TEAM met GUEST_TEAM on ARENA rink in CITY on DATE. 
-def generate_intro(date, home_team_name, guest_team_name, arena_name, city):
+def generate_intro_phrase(date, home_team_name, guest_team_name, arena_name, city):
     selector = random.randint(0, 1)
     result = ""
     if selector == 0:
         result += "On " + date + " " + home_team_name + " welcomed " 
-        result += guest_team_name + " on the ice of " + arena_name + " in " + city
-        result += "."
+        result += guest_team_name + " on the ice of " + arena_name + " in "
+        result += city + "."
     if selector == 1:
         result += home_team_name + " met " + guest_team_name + " on "
         result += arena_name + " rink in " + city + " on " + date + "."
     return result 
 
 #-----------------------------------------------------------------------------
-def generate_first_goal(team, actor_1, minute, actor_2, actor_3):
-    selector = random.randint(0, 5)
+def generate_first_goal_phrase(team, actor_1, minute, actor_2, actor_3):
+    selector = random.randint(0, 4)
     result = ""
     if selector == 0:
-        result += team + " was the first to score through " + actor_1 + " in the "
-        result += add_ending(minute) + " " + "minute."
+        result += team + " was the first to score through " + actor_1
+        result += " in the " + add_ending(minute) + " " + "minute."
     if selector == 1:
         result += "It was " + team + " that struck first, with the effort of "
         result += actor_1 + " in the " + add_ending(minute) + " minute."
@@ -34,14 +34,16 @@ def generate_first_goal(team, actor_1, minute, actor_2, actor_3):
         result += team + " opened the scoring through " + actor_1 + " in the "
         result += add_ending(minute) + " minute."
     if selector == 3:
-        result += actor_1 + "'s goal came first in the " + add_ending(minute) + " minute."
+        result += actor_1 + "'s goal came first in the " + add_ending(minute)
+        result += " minute."
     if selector == 4:
-        result += actor_1 + " of " team + " was the first to score, " + minute 
+        result += actor_1 + " of " + team + " was the first to score, " 
+        result += str(minute)
         result += " minutes into the game"
-        if actor_2 != None:
+        if not actor_2 is None:
             result += ", with the assistance of "
             result += actor_2
-            if actor_3 != None:
+            if not actor_3 is None:
                 result += " and " + actor_3
         result += "."
     return result
@@ -66,6 +68,15 @@ def add_ending(number):
         return number +  "th"        
 
 #-----------------------------------------------------------------------------
+def swapper(name):
+    assert(type(name) == str)
+    space_position = name.find(" ")
+    
+    name = name[space_position:] + " " + name[:space_position]
+    name = name.rstrip().lstrip()
+    
+    return name
+
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -79,7 +90,7 @@ if __name__ == "__main__":
     Player = namedtuple('Player', 
                         ("number", "name", "position"), 
                         verbose = False);
-    
+
     wb = openpyxl.load_workbook('hockey.xlsx')
     ws = wb[wb.get_sheet_names()[0]]
     
@@ -91,7 +102,8 @@ if __name__ == "__main__":
     
     # Generate intro section.
     match_date = ws["A2"].value
-    intro = generate_intro(str(match_date.strftime("%B")) + " " + \
+    intro = generate_intro_phrase(
+                           str(match_date.strftime("%B")) + " " + \
                            str(match_date.strftime("%d")), 
                            team_names[home_team], 
                            team_names[guest_team], 
@@ -154,31 +166,39 @@ if __name__ == "__main__":
             event_place = ws["F" + str(i)].value
             event_result = ws["J" + str(i)].value
             
-            if event_action in goal_events:
+            if event_team != None:
+                team = teams[event_team]
+            
+            if event_action in goal_events or event_result in goal_events:
+                print "dsad"
                 if is_first_goal_scored is False:
                     # First goal event.
+                    actor_2 = ws["H" + str(i)].value
+                    actor_3 = ws["I" + str(i)].value
+                    print generate_first_goal_phrase(event_team, 
+                                               players[team][event_player_number].name, 
+                                               event_time, 
+                                               players[team][actor_2].name, 
+                                               players[team][actor_3].name)
                     is_first_goal_scored = True
-                    pass
                 else:
                     # Common goal event.
                     pass                
                 continue
             
-            if event_team != None:
-                team = teams[event_team]
             
-            if event_action in important_event_actions:
-                print players[team][event_player_number].name, event_action, 
-                print event_team
+            #if event_action in important_event_actions:
+            #    print players[team][event_player_number].name, event_action, 
+            #    print event_team
             
-            if event_result in goal_events:
-                print players[team][event_player_number].name, event_result, 
-                print event_team,
-                
-                if event_place != None:                
-                    print "from", event_place
-                else:
-                    print 
+            #if event_result in goal_events:
+            #    print players[team][event_player_number].name, event_result, 
+            #    print event_team,
+            #    
+            #    if event_place != None:                
+            #        print "from", event_place
+            #    else:
+            #        print 
                     
                     
     last_row = ws.get_highest_row()
