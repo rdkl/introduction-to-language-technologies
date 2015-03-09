@@ -164,6 +164,12 @@ def add_ending(number):
         return number +  "th"        
 
 #-----------------------------------------------------------------------------
+def generate_end_phrase(home_score, guest_score):
+    result = "So the match ends with the score " + str(home_score) 
+    result += "-" + str(guest_score) + "."  
+    return result
+
+#-----------------------------------------------------------------------------
 def swapper(name):    
     space_position = name.find(" ")
     
@@ -171,8 +177,6 @@ def swapper(name):
     name = name.rstrip().lstrip()
     
     return name
-
-#-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -253,7 +257,7 @@ if __name__ == "__main__":
     
     periods = [[52, 76],
                [77, 98],
-               [99, 120],
+               [99, 119],
                [121, 121],
                [123, 133],
                ]
@@ -287,24 +291,40 @@ if __name__ == "__main__":
                     scores[home_team] += 1
                 else:
                     scores[guest_team] += 1
+
+                    if period_number == 4:
+                        # Overtime
+                        continue
+                        
+                        
+                    if period_number == 5:
+                        # Penalties.
+                        continue                   
                     
                 if is_first_goal_scored is False:
                     # First goal event.
-                    actor_2 = ws["H" + str(i)].value
-                    actor_3 = ws["I" + str(i)].value
-                    print generate_first_goal_phrase(event_team, 
-                               player_name, 
-                               event_time, 
-                               players[team][actor_2].name, 
-                               players[team][actor_3].name)
+                    if home_final_score + guest_final_score == 1:
+                        # 1-0 or 0-1.
+                        print generate_single_goal_phrase(player_name, 
+                                                          event_time)
+                    else:
+                        actor_2 = ws["H" + str(i)].value
+                        actor_3 = ws["I" + str(i)].value
+                        print generate_first_goal_phrase(event_team, 
+                                   player_name, 
+                                   event_time, 
+                                   players[team][actor_2].name, 
+                                   players[team][actor_3].name)
+                        
                     is_first_goal_scored = True
                 else:
                     if scores[home_team] == home_final_score and \
                         scores[guest_team] == guest_final_score:
                         print generate_final_goal_phrase(team, 
-                                                         player_name, 
-                                                         event_time, 
-                                                         period_number)
+                                                     player_name, 
+                                                     event_time, 
+                                                     period_number)
+
                     else:
                     # Common goal event.
                         print generate_goals_phrase(event_team, 
@@ -318,24 +338,11 @@ if __name__ == "__main__":
             # Penalty-box events.
             if event_action in penalty_box_events or \
                 event_result in penalty_box_events:
-                print generate_penalty_phrase(player_name, event_time, 
-                                        event_result)
+                print generate_penalty_phrase(player_name, event_time)
                 
             # Injury events.
             if event_action in injury_events or \
                 event_result in injury_events:
-                print generate_injury_phrase(player_name)
-            
-            #if event_action in important_event_actions:
-            #    print players[team][event_player_number].name, event_action, 
-            #    print event_team
-            
-            #if event_result in goal_events:
-            #    print players[team][event_player_number].name, event_result, 
-            #    print event_team,
-            #    
-            #    if event_place != None:                
-            #        print "from", event_place
-            #    else:
-            #        print 
-                    
+                print generate_injury_phrase(player_name, event_time)
+    
+    print generate_end_phrase(home_final_score, guest_final_score)
