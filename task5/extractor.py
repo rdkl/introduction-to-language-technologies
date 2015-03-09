@@ -8,7 +8,11 @@ import random
 #-----------------------------------------------------------------------------
 # On the DATE HOME_TEAM welcomed GUEST_TEAM on the ice of CITY's ARENA.
 # HOME_TEAM met GUEST_TEAM on ARENA rink in CITY on DATE. 
-def generate_intro_phrase(date, home_team_name, guest_team_name, arena_name, city):
+def generate_intro_phrase(date, 
+                          home_team_name, 
+                          guest_team_name, 
+                          arena_name, 
+                          city):
     selector = random.randint(0, 1)
     result = ""
     if selector == 0:
@@ -77,8 +81,12 @@ def generate_penalty_phrase(actor, minute):
 
 #-----------------------------------------------------------------------------
 # Score_home_team and score_guest_team are computing after goal. 
-def generate_goals_phrase(team, actor_1, minute, score_home_team, 
-                          score_guest_team, team_is_home_team):
+def generate_goals_phrase(team, 
+                          actor_1, 
+                          minute, 
+                          score_home_team, 
+                          score_guest_team, 
+                          team_is_home_team):
     selector = random.randint(0, 5)
     result = ""
     if selector == 0:
@@ -122,7 +130,8 @@ def generate_injury_phrase(actor, minute):
     if selector == 0:
         result += actor + " received an injury and was removed from the rink."
     if selector == 1:
-        result += "In the " + add_ending(minute) + " minute " + actor + " was injured."
+        result += "In the " + add_ending(minute) + " minute " + actor
+        result += " was injured."
     if selector == 2:
         result += actor + "'s injury left him out of the game."
     return result
@@ -144,52 +153,49 @@ def generate_penalty_shot_phrase(team, minute, outcome):
     return result    
     
 #-----------------------------------------------------------------------------
+# period - int, action - bool, scores -- int
 def generate_comment_after_period(action, period, 
                                   home_score, guest_score, 
                                   home_team, guest_team):
-    ''' 
-        Function writes comments after finish any period not overtime ors shootout
-        period - int 
-        action - bool
-        others - string
-    '''
     result = ""
+    home_score = int(home_score) 
+    guest_score = int(guest_score)
     if period == 1:
         if action:
             result += "First period ended with the score of "
-            result += home_score + "-" + guest_score + "."
+            result += str(home_score) + "-" + str(guest_score) + "."
         else:
             result += "First period was not sparked by any action."
         if home_score > guest_score:
-            result += "The " + home_team + " was in the lead."
+            result += " The " + home_team + " was in the lead."
         elif home_score < guest_score:
-            result += "The " + guest_team + " was in the lead."
+            result += " The " + guest_team + " was in the lead."
         else:
-            result += "The tie was to be broken in the next period."
+            result += " The tie was to be broken in the next period."
     if period == 2:
         if action:
             result += "The score after the second period was "
-            result += home_score + "-" + guest_score + "."
+            result += str(home_score) + "-" + str(guest_score) + "."
         else:
             result += "Second period did not bring anything to the score."
         if home_score > guest_score:
-            result += "The " + home_team + " was in the lead."
+            result += " The " + home_team + " was in the lead."
         elif home_score < guest_score:
-            result += "The " + guest_team + " was in the lead."
+            result += " The " + guest_team + " was in the lead."
         else:
-            result += "So, the score was levelled by the end of the period."
+            result += " So, the score was leveled by the end of the period."
     if period == 3:
         if action:
             result += "The resulting score was "
-            result += home_score + "-" + guest_score + "."
+            result += str(home_score) + "-" + str(guest_score) + "."
         else:
             result += "The last period did not change the score."
         if home_score > guest_score:
-            result += "The " + home_team + " beat " + guest_team + "."
+            result += " The " + home_team + " beat " + guest_team + "."
         elif home_score < guest_score:
-            result += "The " + guest_team + " beat " + home_team + "."
+            result += " The " + guest_team + " beat " + home_team + "."
         else:
-            result += "There was a tie, so the game went on to the overtime."    
+            result += " There was a tie, so the game went on to the overtime."    
     return result
     
 #-----------------------------------------------------------------------------
@@ -214,7 +220,7 @@ def add_ending(number):
 
 #-----------------------------------------------------------------------------
 def generate_end_phrase(home_score, guest_score):
-    result = "So the match ends with the score " + str(home_score) 
+    result = "The match ends with the score " + str(home_score) 
     result += "-" + str(guest_score) + "."  
     return result
 
@@ -393,5 +399,12 @@ if __name__ == "__main__":
             if event_action in injury_events or \
                 event_result in injury_events:
                 print generate_injury_phrase(player_name, event_time)
+        
+        print generate_comment_after_period(True, 
+                                            period_number, 
+                                            scores[home_team], 
+                                            scores[guest_team], 
+                                            team_names[home_team], 
+                                            team_names[guest_team])
     
     print generate_end_phrase(home_final_score, guest_final_score)
