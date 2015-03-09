@@ -22,7 +22,7 @@ def generate_intro(date, home_team_name, guest_team_name, arena_name, city):
 
 #-----------------------------------------------------------------------------
 def generate_first_goal(team, actor_1, minute, actor_2, actor_3):
-    selector = random.randint(0, 5)
+    selector = random.randint(0, 4)
     result = ""
     if selector == 0:
         result += team + " was the first to score through " + actor_1 + " in the "
@@ -44,6 +44,30 @@ def generate_first_goal(team, actor_1, minute, actor_2, actor_3):
             if actor_3 != None:
                 result += " and " + actor_3
         result += "."
+    return result
+    
+#-----------------------------------------------------------------------------
+def generate_goals_phrase(team, actor_1, minute, score_1, score_2):
+    selector = random.randint(0, 5)
+    result = ""
+    if selector == 0:
+        result += "Then " + actor_1 + " scored through "
+        result += actor_1 + "."
+    if selector == 1:
+        result += "After that " + actor_1 + " made it " + score_1 + "-" + score_2
+        result += " in the " + add_ending(minute) + " minute."
+    if selector == 2:
+        result += "After that " + actor_1 + " scored to put his team "
+        result += score_1 + "-" + score_2 + " up."
+    if selector == 3:
+        result += "Later " + actor_1 + " of " + team + " took it to "
+        result +=  score_1 + "-" + score_2 + " in the " + add_ending(minute) + " minute."
+    if selector == 4:
+        result += "Then " + team + " went to " + score_1 + "-" + score_2
+        result += " thanks to " + actor_1 + "'s goal."
+    if selector == 5:
+        result += "The goal came in the " + add_ending(minute) + " minute, " + actor_1
+        result += " being the architect."
     return result
 
 #-----------------------------------------------------------------------------
